@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Created by Ali Muridke (03091539086) - Education Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border: #e9ecef;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Auth Section */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--light);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            color: var(--gray);
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+        }
+
+        /* Main App */
+        #appSection {
+            display: none;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar FIX: Off-canvas by default, fixed position to LEFT */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0; /* Ensures it is on the left side */
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transform: translateX(-100%); /* Start hidden (off-canvas) */
+        }
+        
+        .sidebar.open {
+            transform: translateX(0); /* Slide in when open */
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* To position the close button */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            margin-left: 10px;
+        }
+        
+        /* New Close Button Style */
+        .sidebar-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            transition: opacity 0.3s;
+        }
+        
+        .sidebar-close-btn:hover {
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 15px 0;
+        }
+
+        .sidebar-menu li {
+            padding: 14px 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .sidebar-menu li i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-menu li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+
+        /* Main Content FIX: Default to full width, desktop adds margin */
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            margin-left: 0; /* Full width by default */
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* Backdrop for mobile to close sidebar */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            transition: opacity 0.3s;
+        }
+        
+        .sidebar-backdrop.open {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: sticky; 
+            top: 0;
+            z-index: 900;
+        }
+
+        .menu-toggle {
+            font-size: 24px;
+            cursor: pointer;
+            background: var(--light);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .section-header p {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        /* Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* Forms */
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--light);
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(67, 97, 238, 0.03);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        /* Calculator */
+        .calculator {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .calc-display {
+            width: 100%;
+            padding: 20px;
+            font-size: 28px;
+            text-align: right;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-btn {
+            padding: 16px;
+            font-size: 18px;
+            border: none;
+            background: var(--light);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .calc-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .calc-btn.operator {
+            background: var(--primary);
+            color: white;
+        }
+
+        .calc-btn.operator:hover {
+            background: var(--primary-dark);
+        }
+
+        .calc-btn.equals {
+            background: var(--success);
+            color: white;
+            grid-row: span 2;
+        }
+
+        .calc-btn.equals:hover {
+            background: #3aa8d0;
+        }
+
+        .calc-btn.clear {
+            background: var(--danger);
+            color: white;
+        }
+
+        .calc-btn.clear:hover {
+            background: #e3126e;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFade 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--dark);
+            font-size: 22px;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        /* Status Indicators */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-present {
+            background: rgba(76, 201, 240, 0.2);
+            color: #3aa8d0;
+        }
+
+        .status-absent {
+            background: rgba(247, 37, 133, 0.2);
+            color: #e3126e;
+        }
+
+        .status-pending {
+            background: rgba(248, 150, 30, 0.2);
+            color: #e6890e;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive Fixes */
+        @media (min-width: 992px) {
+            /* Desktop Layout */
+            .sidebar {
+                transform: translateX(0); /* Always visible */
+            }
+            
+            .main-content {
+                margin-left: var(--sidebar-width); /* Push content right */
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .sidebar-close-btn {
+                display: none; /* Hide close button on desktop */
+            }
+        }
+        
+        @media (max-width: 991px) {
+            /* Mobile/Tablet Layout */
+            .sidebar {
+                width: 70vw; /* Take up 70% of the viewport width */
+                max-width: var(--sidebar-width);
+                z-index: 1001; /* Above backdrop */
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .user-info {
+                justify-content: center;
+            }
+        }
+        
+        /* Currency Styling */
+        .currency {
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        .currency::before {
+            content: "PKR ";
+        }
+
+        /* Fee Status */
+        .fee-status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .fee-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .fee-partial {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .fee-pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .whatsapp-notification {
+            background: #25D366;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .whatsapp-notification:hover {
+            background: #128C7E;
+        }
+    </style>
+</head>
+<body>
+    <div id="authSection" class="auth-container">
+        <div class="auth-form">
+            <div class="auth-header">
+                <h1><i class="fas fa-graduation-cap"></i> Created by Ali Muridke (03091539086)</h1>
+                <p>Education Management System</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="loginTab">Login</div>
+                <div class="auth-tab" id="registerTab">Register</div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="loginUsername" class="form-control" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn">Login to Dashboard</button>
+            </form>
+            
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername"><i class="fas fa-user-plus"></i> Username</label>
+                    <input type="text" id="registerUsername" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPIN"><i class="fas fa-key"></i> Security PIN</label>
+                    <input type="password" id="registerPIN" class="form-control" placeholder="4-digit PIN for security" maxlength="4" required>
+                </div>
+                <button type="submit" class="btn btn-success">Create Account</button>
+            </form>
+            
+            <div id="authMessage" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="appSection" class="app-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-title">
+                    <i class="fas fa-graduation-cap fa-2x"></i>
+                    <h2>Ali Muridke (0309...)</h2>
+                </div>
+                <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </li>
+                <li data-section="students">
+                    <i class="fas fa-user-graduate"></i> Student Admission
+                </li>
+                <li data-section="fees">
+                    <i class="fas fa-money-bill-wave"></i> Fee Collection
+                </li>
+                <li data-section="attendance">
+                    <i class="fas fa-calendar-check"></i> Attendance
+                </li>
+                <li data-section="calculator">
+                    <i class="fas fa-calculator"></i> Calculator
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <div class="main-content" id="mainContent">
+            <div class="header">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div>Welcome, <strong id="loggedInUser">User</strong></div>
+                        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboardSection" class="content-section active">
+                <div class="section-header">
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome to your education management dashboard</p>
+                </div>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Total Students</h3>
+                        <div class="card-value" id="totalStudents">0</div>
+                        <div class="card-desc">Registered in academy</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3>Fees Collected</h3>
+                        <div class="card-value"><span class="currency" id="feesCollected">0</span></div>
+                        <div class="card-desc">This month</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>Today's Attendance</h3>
+                        <div class="card-value" id="todayAttendance">0%</div>
+                        <div class="card-desc">Present students</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3>Pending Fees</h3>
+                        <div class="card-value" id="pendingFees">0</div>
+                        <div class="card-desc">For current month</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="table-container">
+                        <h3>Recent Fee Collections</h3>
+                        <table id="recentFeesTable">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="table-container">
+                        <h3>Recent Attendance</h3>
+                        <table id="recentAttendanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="studentsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Student Admission</h2>
+                    <p>Manage student records and information</p>
+                </div>
+                
+                <div class="form-container">
+                    <h3>Add New Student</h3>
+                    <form id="studentForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="studentName">Student Name</label>
+                                <input type="text" id="studentName" class="form-control" placeholder="Full name of student" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentGrade">Grade (1-12)</label>
+                                <select id="studentGrade" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    <option value="1">Grade 1</option>
+                                    <option value="2">Grade 2</option>
+                                    <option value="3">Grade 3</option>
+                                    <option value="4">Grade 4</option>
+                                    <option value="5">Grade 5</option>
+                                    <option value="6">Grade 6</option>
+                                    <option value="7">Grade 7</option>
+                                    <option value="8">Grade 8</option>
+                                    <option value="9">Grade 9</option>
+                                    <option value="10">Grade 10</option>
+                                    <option value="11">Grade 11</option>
+                                    <option value="12">Grade 12</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentPhone">Parent's Phone</label>
+                                <input type="tel" id="studentPhone" class="form-control" placeholder="03XX-XXXXXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentFee">Monthly Fee (PKR)</label>
+                                <input type="number" id="studentFee" class="form-control" placeholder="Monthly fee amount" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn"><i class="fas fa-plus-circle"></i> Add Student</button>
+                    </form>
+                </div>
+                
+                <div class="table-container">
+                    <h3>Student Records (History)</h3>
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Grade</th>
+                                <th>Phone</th>
+                                <th>Monthly Fee</th>
+                                <th>Fee Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="feesSection" class="content-section">
+                <div class="section-header">
+                    <h2>Fee Collection</h2>
+                    <p>Record and manage student fee payments</p>
+                </div>
+                
+                <div class="form-container">
+                    <h3>Collect Fee</h3>
+                    <form id="feeForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="feeStudent">Select Student</label>
+                                <select id="feeStudent" class="form-control" required>
+                                    <option value="">Select Student</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="feeMonth">Month</label>
+                                <input type="month" id="feeMonth" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="feeAmount">Amount (PKR)</label>
+                                <input type="number" id="feeAmount" class="form-control" placeholder="Amount to collect" required>
+                                <small id="feeHelp" style="color: var(--dark); font-weight: 600; margin-top: 5px; display: block;">
+                                    Monthly Fee: <span class="currency" id="monthlyFeeDisplay">0</span> | 
+                                    <span style="color: var(--danger);">Remaining/Due: <span class="currency" id="remainingFeeDisplay">0</span></span>
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label for="feeDate">Payment Date</label>
+                                <input type="date" id="feeDate" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn"><i class="fas fa-money-check"></i> Collect Fee</button>
+                    </form>
+                </div>
+                
+                <div class="table-container">
+                    <h3>Fee Records (History)</h3>
+                    <table id="feesTable">
+                        <thead>
+                            <tr>
+                                <th>Receipt ID</th>
+                                <th>Student Name</th>
+                                <th>Month</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date Paid</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="attendanceSection" class="content-section">
+                <div class="section-header">
+                    <h2>Attendance Management</h2>
+                    <p>Track and manage student attendance</p>
+                </div>
+                
+                <div class="form-container">
+                    <h3>Mark Attendance</h3>
+                    <form id="attendanceForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="attendanceDate">Date</label>
+                                <input type="date" id="attendanceDate" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Mark Attendance for Students</label>
+                            <div id="attendanceList" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); padding: 15px; border-radius: 8px;">
+                                </div>
+                        </div>
+                        <button type="submit" class="btn"><i class="fas fa-save"></i> Save Attendance</button>
+                    </form>
+                </div>
+                
+                <div class="table-container">
+                    <h3>Attendance Records (History)</h3>
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Percentage</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="calculatorSection" class="content-section">
+                <div class="section-header">
+                    <h2>Calculator</h2>
+                    <p>Quick calculations for your academy</p>
+                </div>
+                
+                <div class="calculator">
+                    <input type="text" class="calc-display" id="calcDisplay" readonly>
+                    <div class="calc-buttons">
+                        <button class="calc-btn clear" onclick="clearCalc()">C</button>
+                        <button class="calc-btn" onclick="deleteLast()">⌫</button>
+                        <button class="calc-btn operator" onclick="appendToCalc('/')">/</button>
+                        <button class="calc-btn operator" onclick="appendToCalc('*')">×</button>
+                        
+                        <button class="calc-btn" onclick="appendToCalc('7')">7</button>
+                        <button class="calc-btn" onclick="appendToCalc('8')">8</button>
+                        <button class="calc-btn" onclick="appendToCalc('9')">9</button>
+                        <button class="calc-btn operator" onclick="appendToCalc('-')">-</button>
+                        
+                        <button class="calc-btn" onclick="appendToCalc('4')">4</button>
+                        <button class="calc-btn" onclick="appendToCalc('5')">5</button>
+                        <button class="calc-btn" onclick="appendToCalc('6')">6</button>
+                        <button class="calc-btn operator" onclick="appendToCalc('+')">+</button>
+                        
+                        <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                        <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                        <button class="calc-btn" onclick="appendToCalc('3')">3</button>
+                        <button class="calc-btn equals" onclick="calculateResult()">=</button>
+                        
+                        <button class="calc-btn" onclick="appendToCalc('0')" style="grid-column: span 2;">0</button>
+                        <button class="calc-btn" onclick="appendToCalc('.')">.</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pinModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Enter Security PIN</h3>
+                <span class="close-modal" onclick="closePinModal()">×</span>
+            </div>
+            <p style="margin-bottom: 15px;">To perform this secure action (Delete/Edit), please enter your 4-digit PIN.</p>
+            <div class="form-group">
+                <input type="password" id="pinInput" class="form-control" placeholder="Enter your 4-digit PIN" maxlength="4">
+            </div>
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <button class="btn btn-danger" onclick="closePinModal()">Cancel</button>
+                <button class="btn btn-success" onclick="verifyPin()">Verify PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state - Initialize as empty arrays, data will be loaded after login
+        let currentUser = null;
+        let students = [];
+        let fees = [];
+        let attendance = [];
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentAction = null;
+        let currentItemId = null;
+        let calcExpression = '';
+
+        // Sidebar Elements
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        // New: Utility function to generate a unique key for the current user's data
+        function getUserDataKey(keyName) {
+            if (!currentUser || !currentUser.username) return null;
+            // Use username to scope data, removing non-alphanumeric chars for safety
+            return `${keyName}_${currentUser.username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`;
+        }
+
+        // New: Load user-specific data after login
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            const studentKey = getUserDataKey('students');
+            const feesKey = getUserDataKey('fees');
+            const attendanceKey = getUserDataKey('attendance');
+            
+            students = JSON.parse(localStorage.getItem(studentKey)) || [];
+            fees = JSON.parse(localStorage.getItem(feesKey)) || [];
+            attendance = JSON.parse(localStorage.getItem(attendanceKey)) || [];
+        }
+
+        // New: Save user-specific data
+        function saveUserData() {
+            if (!currentUser) return;
+            
+            const studentKey = getUserDataKey('students');
+            const feesKey = getUserDataKey('fees');
+            const attendanceKey = getUserDataKey('attendance');
+            
+            localStorage.setItem(studentKey, JSON.stringify(students));
+            localStorage.setItem(feesKey, JSON.stringify(fees));
+            localStorage.setItem(attendanceKey, JSON.stringify(attendance));
+        }
+
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loadUserData(); // Load user-specific data
+                showApp();
+            }
+
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Set current dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('feeMonth').valueAsDate = new Date();
+            document.getElementById('feeDate').value = today;
+            document.getElementById('attendanceDate').value = today;
+            
+            // Initial UI update (will use empty data if not logged in)
+            updateDashboard();
+            updateStudentDropdown();
+            loadStudentsTable();
+            loadFeesTable();
+            loadAttendanceTable();
+        });
+
+        // Set up event listeners (MODIFIED)
+        function setupEventListeners() {
+            // Auth tabs
+            document.getElementById('loginTab').addEventListener('click', () => switchAuthTab('login'));
+            document.getElementById('registerTab').addEventListener('click', () => switchAuthTab('register'));
+            
+            // Auth forms
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Sidebar toggle and close (NEW LOGIC)
+            document.getElementById('menuToggle').addEventListener('click', openSidebar); 
+            document.getElementById('sidebarCloseBtn').addEventListener('click', closeSidebar);
+            backdrop.addEventListener('click', closeSidebar);
+            
+            // Menu items (MODIFIED to close sidebar on click)
+            document.querySelectorAll('.sidebar-menu li').forEach(item => {
+                item.addEventListener('click', () => {
+                    const section = item.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update active menu item
+                    document.querySelectorAll('.sidebar-menu li').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Close sidebar after selection
+                    closeSidebar();
+                });
+            });
+            
+            // Student form
+            document.getElementById('studentForm').addEventListener('submit', handleAddStudent);
+            
+            // Fee form
+            document.getElementById('feeForm').addEventListener('submit', handleFeeCollection);
+            // Call updateFeeInfo on both student selection and month change
+            document.getElementById('feeStudent').addEventListener('change', updateFeeInfo);
+            document.getElementById('feeMonth').addEventListener('change', updateFeeInfo);
+            
+            // Attendance form
+            document.getElementById('attendanceForm').addEventListener('submit', handleAttendance);
+        }
+
+        // Sidebar Control functions
+        function openSidebar() {
+            sidebar.classList.add('open');
+            backdrop.classList.add('open');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('open');
+        }
+
+        // Authentication functions
+        function switchAuthTab(tab) {
+            document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+            document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+            document.getElementById('authMessage').innerHTML = '';
+            
+            if (tab === 'login') {
+                document.getElementById('registerForm').reset();
+            } else {
+                document.getElementById('loginForm').reset();
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                loadUserData(); // Load this user's specific data
+                showApp();
+                showAuthMessage('Login successful! Redirecting to dashboard...', 'success');
+            } else {
+                showAuthMessage('Invalid username or password. Please try again.', 'error');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const pin = document.getElementById('registerPIN').value;
+            
+            if (pin.length !== 4 || isNaN(pin)) {
+                showAuthMessage('PIN must be a 4-digit number', 'error');
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                showAuthMessage('Username already exists. Please choose a different one.', 'error');
+                return;
+            }
+            
+            const newUser = { username, password, pin };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showAuthMessage('Registration successful! You can now login with your credentials.', 'success');
+            switchAuthTab('login');
+            
+            document.getElementById('registerForm').reset();
+        }
+
+        function showAuthMessage(message, type) {
+            const messageDiv = document.getElementById('authMessage');
+            messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            // Clear in-memory data
+            students = [];
+            fees = [];
+            attendance = [];
+
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('appSection').style.display = 'none';
+        }
+
+        // UI Navigation functions
+        function showApp() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('loggedInUser').textContent = currentUser.username;
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            showSection('dashboard');
+            
+            // Ensure all UI elements are updated with fresh data after login
+            updateDashboard();
+            updateStudentDropdown();
+            loadStudentsTable();
+            loadFeesTable();
+            loadAttendanceTable();
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            
+            document.getElementById(`${section}Section`).classList.add('active');
+            
+            const titles = {
+                dashboard: 'Dashboard Overview',
+                students: 'Student Admission',
+                fees: 'Fee Collection',
+                attendance: 'Attendance Management',
+                calculator: 'Calculator'
+            };
+            document.getElementById('pageTitle').textContent = titles[section];
+            
+            if (section === 'attendance') {
+                loadAttendanceForm();
+            }
+        }
+
+        // Student Management functions
+        function handleAddStudent(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value;
+            const grade = document.getElementById('studentGrade').value;
+            const phone = document.getElementById('studentPhone').value;
+            const fee = document.getElementById('studentFee').value;
+            
+            if (!phone.match(/^03\d{9}$/)) {
+                alert('Please enter a valid Pakistani phone number (03XXXXXXXXX)');
+                return;
+            }
+            
+            const newStudent = {
+                id: generateId(),
+                name,
+                grade,
+                phone,
+                fee: parseInt(fee),
+                admissionDate: new Date().toISOString().split('T')[0]
+            };
+            
+            students.push(newStudent);
+            saveUserData(); // Save students data
+            
+            const message = `Assalam-o-Alaikum! ${name} has been admitted to Grade ${grade}. Monthly fee: PKR ${fee}. Created by Ali Muridke (03091539086)`;
+            openWhatsApp(phone, message);
+            
+            alert('Student added successfully! WhatsApp message ready to send.');
+            document.getElementById('studentForm').reset();
+            loadStudentsTable();
+            updateStudentDropdown();
+            updateDashboard();
+        }
+
+        function loadStudentsTable() {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+            
+            students.forEach(student => {
+                // Calculate fee status for this month
+                const currentMonth = new Date().toISOString().slice(0, 7);
+                const studentFees = fees.filter(f => f.studentId === student.id && f.month === currentMonth);
+                const totalPaid = studentFees.reduce((sum, fee) => sum + fee.amount, 0);
+                const remaining = student.fee - totalPaid;
+                
+                let feeStatus = 'Pending';
+                let statusClass = 'fee-pending';
+                
+                if (remaining <= 0) {
+                    feeStatus = 'Paid';
+                    statusClass = 'fee-paid';
+                } else if (totalPaid > 0) {
+                    feeStatus = `Partial (PKR ${remaining} due)`;
+                    statusClass = 'fee-partial';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>Grade ${student.grade}</td>
+                    <td>${student.phone}</td>
+                    <td><span class="currency">${student.fee}</span></td>
+                    <td><span class="fee-status ${statusClass}">${feeStatus}</span></td>
+                    <td class="action-buttons">
+                        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deleteStudent(id) {
+            currentAction = 'deleteStudent'; // Changed to be more specific
+            currentItemId = id;
+            openPinModal();
+        }
+
+        // Fee Management functions
+        function updateStudentDropdown() {
+            const dropdown = document.getElementById('feeStudent');
+            dropdown.innerHTML = '<option value="">Select Student</option>';
+            
+            students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} (Grade ${student.grade}) - PKR ${student.fee}/month`;
+                option.setAttribute('data-fee', student.fee);
+                dropdown.appendChild(option);
+            });
+            // Recalculate fee info when dropdown updates
+            updateFeeInfo(); 
+        }
+
+        function updateFeeInfo() {
+            const studentId = document.getElementById('feeStudent').value;
+            const month = document.getElementById('feeMonth').value;
+            
+            const monthlyFeeDisplay = document.getElementById('monthlyFeeDisplay');
+            const remainingFeeDisplay = document.getElementById('remainingFeeDisplay');
+            const feeAmountInput = document.getElementById('feeAmount');
+            
+            if (!studentId || !month) {
+                monthlyFeeDisplay.textContent = '0';
+                remainingFeeDisplay.textContent = '0';
+                feeAmountInput.max = null;
+                feeAmountInput.value = '';
+                return;
+            }
+            
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            // Calculate already paid amount for this month
+            const paidFees = fees.filter(f => f.studentId === studentId && f.month === month);
+            const totalPaid = paidFees.reduce((sum, fee) => sum + fee.amount, 0);
+            const remaining = student.fee - totalPaid;
+            
+            // Update displays
+            monthlyFeeDisplay.textContent = student.fee;
+            remainingFeeDisplay.textContent = remaining < 0 ? 0 : remaining; // Show 0 if overpaid
+            
+            // Set max value for fee amount input to the remaining fee
+            feeAmountInput.max = remaining < 0 ? 0 : remaining;
+            
+            // Set default value for amount input (suggest full remaining amount)
+            if (remaining > 0) {
+                 feeAmountInput.value = remaining;
+            } else {
+                 feeAmountInput.value = 0;
+            }
+        }
+
+        function handleFeeCollection(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('feeStudent').value;
+            const month = document.getElementById('feeMonth').value;
+            const amount = parseInt(document.getElementById('feeAmount').value);
+            const datePaid = document.getElementById('feeDate').value;
+            
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                alert('Please select a valid student');
+                return;
+            }
+            
+            // Recalculate remaining fee before processing
+            const paidFees = fees.filter(f => f.studentId === studentId && f.month === month);
+            const totalPaid = paidFees.reduce((sum, fee) => sum + fee.amount, 0);
+            const remaining = student.fee - totalPaid;
+            
+            if (amount > remaining) {
+                alert(`Cannot collect more than the remaining fee amount (PKR ${remaining < 0 ? 0 : remaining})`);
+                return;
+            }
+            
+            if (amount <= 0) {
+                alert('Please enter a valid amount greater than zero');
+                return;
+            }
+            
+            const newFee = {
+                id: generateId(),
+                studentId,
+                studentName: student.name,
+                month,
+                amount: amount,
+                datePaid
+            };
+            
+            fees.push(newFee);
+            saveUserData(); // Save fees data
+            
+            // WhatsApp message content
+            const totalPaidNow = totalPaid + amount;
+            const remainingAfterPayment = student.fee - totalPaidNow;
+            const status = remainingAfterPayment <= 0 ? 'Fully Paid' : `Partially Paid (PKR ${remainingAfterPayment} due)`;
+            
+            const message = `Fee Receipt - ${student.name}\nMonth: ${month}\nAmount: PKR ${amount}\nStatus: ${status}\nDate: ${datePaid}\nThank you! - Created by Ali Muridke (03091539086)`;
+            openWhatsApp(student.phone, message);
+            
+            alert('Fee collected successfully! WhatsApp receipt ready to send.');
+            document.getElementById('feeForm').reset();
+            document.getElementById('feeMonth').valueAsDate = new Date();
+            document.getElementById('feeDate').value = new Date().toISOString().split('T')[0];
+            loadFeesTable();
+            loadStudentsTable(); // Update fee status on student table
+            updateDashboard();
+            updateFeeInfo(); // Update remaining info
+        }
+
+        function loadFeesTable() {
+            const tbody = document.querySelector('#feesTable tbody');
+            tbody.innerHTML = '';
+            
+            const sortedFees = [...fees].sort((a, b) => new Date(b.datePaid) - new Date(a.datePaid));
+            
+            sortedFees.forEach(fee => {
+                const student = students.find(s => s.id === fee.studentId);
+                // Check if student exists (handle deleted students)
+                if (!student) {
+                     // Add a row for deleted student fees as history, marking them clearly
+                    const rowDeleted = document.createElement('tr');
+                    rowDeleted.innerHTML = `
+                        <td>${fee.id}</td>
+                        <td><span style="color:var(--danger); font-style:italic;">[DELETED] ${fee.studentName}</span></td>
+                        <td>${fee.month}</td>
+                        <td><span class="currency">${fee.amount}</span></td>
+                        <td><span class="fee-status fee-pending">Archived</span></td>
+                        <td>${fee.datePaid}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-danger btn-sm" onclick="deleteFee('${fee.id}')"><i class="fas fa-trash"></i> Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(rowDeleted);
+                    return;
+                }
+                
+                // Continue with active student
+                const totalMonthlyFee = student.fee;
+                const paidFees = fees.filter(f => f.studentId === fee.studentId && f.month === fee.month);
+                const totalPaidForMonth = paidFees.reduce((sum, f) => sum + f.amount, 0);
+                const remaining = totalMonthlyFee - totalPaidForMonth;
+                
+                let status = 'Partial';
+                let statusClass = 'fee-partial';
+                
+                if (remaining <= 0) {
+                    status = 'Paid';
+                    statusClass = 'fee-paid';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fee.id}</td>
+                    <td>${fee.studentName}</td>
+                    <td>${fee.month}</td>
+                    <td><span class="currency">${fee.amount}</span></td>
+                    <td><span class="fee-status ${statusClass}">${status}</span></td>
+                    <td>${fee.datePaid}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-whatsapp btn-sm" onclick="resendReceipt('${fee.id}')"><i class="fab fa-whatsapp"></i> Resend</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteFee('${fee.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Update recent fees table on dashboard
+            const recentFeesTbody = document.querySelector('#recentFeesTable tbody');
+            recentFeesTbody.innerHTML = '';
+            
+            const recentFees = sortedFees.slice(0, 5); // Show only 5 most recent
+            recentFees.forEach(fee => {
+                const student = students.find(s => s.id === fee.studentId);
+                if (!student) return; // Skip if student is deleted
+                
+                const paidFees = fees.filter(f => f.studentId === fee.studentId && f.month === fee.month);
+                const totalPaid = paidFees.reduce((sum, f) => sum + f.amount, 0);
+                const remaining = student.fee - totalPaid;
+
+                let status = remaining <= 0 ? 'Paid' : 'Partial';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fee.studentName}</td>
+                    <td><span class="currency">${fee.amount}</span></td>
+                    <td><span class="fee-status ${status === 'Paid' ? 'fee-paid' : 'fee-partial'}">${status}</span></td>
+                    <td>${fee.datePaid}</td>
+                `;
+                recentFeesTbody.appendChild(row);
+            });
+        }
+
+        function resendReceipt(feeId) {
+            const fee = fees.find(f => f.id === feeId);
+            const student = students.find(s => s.id === fee.studentId);
+            
+            if (!student) {
+                alert("Student record not found. Cannot resend.");
+                return;
+            }
+
+            const paidFees = fees.filter(f => f.studentId === fee.studentId && f.month === fee.month);
+            const totalPaid = paidFees.reduce((sum, f) => sum + f.amount, 0);
+            const remaining = student.fee - totalPaid;
+            const status = remaining <= 0 ? 'Fully Paid' : `Partially Paid (PKR ${remaining} due)`;
+            
+            const message = `Fee Receipt - ${student.name}\nMonth: ${fee.month}\nAmount: PKR ${fee.amount}\nStatus: ${status}\nDate: ${fee.datePaid}\nThank you! - Created by Ali Muridke (03091539086)`;
+            openWhatsApp(student.phone, message);
+            
+            alert('WhatsApp receipt ready to send!');
+        }
+
+        function deleteFee(id) {
+            currentAction = 'deleteFee';
+            currentItemId = id;
+            openPinModal();
+        }
+
+        // Attendance Management functions
+        function loadAttendanceForm() {
+            const container = document.getElementById('attendanceList');
+            container.innerHTML = '';
+            
+            if (students.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--gray);">No students available. Please add students first.</p>';
+                return;
+            }
+            
+            // Pre-load current day's data if it exists
+            const date = document.getElementById('attendanceDate').value;
+            const existingRecord = attendance.find(a => a.date === date);
+
+            students.forEach(student => {
+                // Determine initial state based on existing record
+                const isPresent = existingRecord ? existingRecord.present.includes(student.id) : true;
+                
+                const div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.marginBottom = '10px';
+                div.style.padding = '10px';
+                div.style.border = '1px solid var(--border)';
+                div.style.borderRadius = '6px';
+                
+                div.innerHTML = `
+                    <input type="checkbox" id="attendance-${student.id}" ${isPresent ? 'checked' : ''} style="margin-right: 10px;">
+                    <label for="attendance-${student.id}" style="margin: 0; flex-grow: 1;">${student.name} (Grade ${student.grade})</label>
+                    <span class="status-badge ${isPresent ? 'status-present' : 'status-absent'}">${isPresent ? 'Present' : 'Absent'}</span>
+                `;
+                
+                // Add event listener to update status text
+                const checkbox = div.querySelector(`#attendance-${student.id}`);
+                const statusSpan = div.querySelector('span');
+                
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        statusSpan.textContent = 'Present';
+                        statusSpan.className = 'status-badge status-present';
+                    } else {
+                        statusSpan.textContent = 'Absent';
+                        statusSpan.className = 'status-badge status-absent';
+                    }
+                });
+                
+                container.appendChild(div);
+            });
+        }
+
+        function handleAttendance(e) {
+            e.preventDefault();
+            const date = document.getElementById('attendanceDate').value;
+            
+            // Remove existing attendance before adding new one
+            attendance = attendance.filter(a => a.date !== date);
+            
+            const presentStudents = [];
+            const absentStudents = [];
+            
+            students.forEach(student => {
+                const checkbox = document.getElementById(`attendance-${student.id}`);
+                if (checkbox.checked) {
+                    presentStudents.push(student.id);
+                } else {
+                    absentStudents.push(student.id);
+                    // Open WhatsApp for absent alert
+                    const message = `Attendance Alert: ${student.name} was absent on ${date}. Please contact the academy for more information. - Created by Ali Muridke (03091539086)`;
+                    openWhatsApp(student.phone, message);
+                }
+            });
+            
+            if (students.length === 0) {
+                 alert('No students to mark attendance for.');
+                 return;
+            }
+
+            const newAttendance = {
+                id: generateId(),
+                date,
+                present: presentStudents,
+                absent: absentStudents
+            };
+            
+            attendance.push(newAttendance);
+            saveUserData(); // Save attendance data
+            
+            if (absentStudents.length > 0) {
+                alert('Attendance saved successfully! WhatsApp alerts ready to send for absent students.');
+            } else {
+                alert('Attendance saved successfully! All students are present today.');
+            }
+            
+            // document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+            loadAttendanceTable();
+            updateDashboard();
+        }
+
+        function loadAttendanceTable() {
+            const tbody = document.querySelector('#attendanceTable tbody');
+            tbody.innerHTML = '';
+            
+            const sortedAttendance = [...attendance].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedAttendance.forEach(record => {
+                const totalStudentsOnDate = record.present.length + record.absent.length;
+                const percentage = totalStudentsOnDate > 0 ? Math.round((record.present.length / totalStudentsOnDate) * 100) : 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td><span class="status-badge status-present">${record.present.length}</span></td>
+                    <td><span class="status-badge status-absent">${record.absent.length}</span></td>
+                    <td>${percentage}%</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-whatsapp btn-sm" onclick="resendAbsentAlerts('${record.id}')"><i class="fab fa-whatsapp"></i> Resend Alerts</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAttendance('${record.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Update recent attendance table on dashboard
+            const recentAttendanceTbody = document.querySelector('#recentAttendanceTable tbody');
+            recentAttendanceTbody.innerHTML = '';
+            
+            const recentAttendance = sortedAttendance.slice(0, 5); // Show only 5 most recent
+            recentAttendance.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.present.length}</td>
+                    <td>${record.absent.length}</td>
+                `;
+                recentAttendanceTbody.appendChild(row);
+            });
+        }
+
+        function resendAbsentAlerts(attendanceId) {
+            const record = attendance.find(a => a.id === attendanceId);
+            
+            record.absent.forEach(studentId => {
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    const message = `Attendance Alert: ${student.name} was absent on ${record.date}. Please contact the academy for more info thanks information. - Created by Ali Muridke (03091539086)`;
+                    openWhatsApp(student.phone, message);
+                }
+            });
+            
+            alert('WhatsApp alerts ready to send for absent students!');
+        }
+
+        function deleteAttendance(id) {
+            currentAction = 'deleteAttendance';
+            currentItemId = id;
+            openPinModal();
+        }
+
+        // WhatsApp Integration
+        function openWhatsApp(phone, message) {
+            // Remove any non-digit characters from phone number and ensure format is 923XXXXXXXXX
+            let cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.startsWith('03')) {
+                cleanPhone = '92' + cleanPhone.substring(1);
+            }
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // PIN Protected Actions (MODIFIED)
+        function openPinModal() {
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinInput').focus();
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').style.display = 'none';
+            currentAction = null;
+            currentItemId = null;
+        }
+
+        function verifyPin() {
+            const pin = document.getElementById('pinInput').value;
+            
+            if (!currentUser || !currentUser.pin) {
+                alert('No admin PIN found. Login again.');
+                closePinModal();
+                return;
+            }
+
+            if (pin === currentUser.pin) {
+                executeProtectedAction();
+                closePinModal();
+            } else {
+                alert('Incorrect PIN. Please try again.');
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinInput').focus();
+            }
+        }
+
+        function executeProtectedAction() {
+            if (!currentItemId) return;
+
+            switch(currentAction) {
+                case 'deleteStudent':
+                    if (confirm('Are you sure you want to PERMANENTLY delete this student? Fee and attendance history will remain but be marked as archived.')) {
+                        students = students.filter(s => s.id !== currentItemId);
+                        saveUserData(); // Save updated students data
+                        loadStudentsTable();
+                        updateStudentDropdown();
+                        updateDashboard();
+                        alert('Student deleted successfully');
+                    }
+                    break;
+                case 'deleteFee':
+                    if (confirm('Are you sure you want to PERMANENTLY delete this fee receipt?')) {
+                        fees = fees.filter(f => f.id !== currentItemId);
+                        saveUserData(); // Save updated fees data
+                        loadFeesTable();
+                        loadStudentsTable(); // To update fee status
+                        updateDashboard();
+                        alert('Fee record deleted successfully');
+                    }
+                    break;
+                case 'deleteAttendance':
+                    if (confirm('Are you sure you want to PERMANENTLY delete this attendance record?')) {
+                        attendance = attendance.filter(a => a.id !== currentItemId);
+                        saveUserData(); // Save updated attendance data
+                        loadAttendanceTable();
+                        updateDashboard();
+                        alert('Attendance record deleted successfully');
+                    }
+                    break;
+                default:
+                    // Fallback for actions that didn't need PIN
+                    alert('Action not defined for PIN protection.');
+            }
+        }
+
+        // Dashboard functions
+        function updateDashboard() {
+            document.getElementById('totalStudents').textContent = students.length;
+            
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const monthlyFees = fees.filter(f => f.month === currentMonth)
+                                   .reduce((sum, fee) => sum + fee.amount, 0);
+            document.getElementById('feesCollected').textContent = monthlyFees;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecord = attendance.find(a => a.date === today);
+            
+            if (todayRecord) {
+                const totalStudentsOnDate = todayRecord.present.length + todayRecord.absent.length;
+                const percentage = totalStudentsOnDate > 0 ? Math.round((todayRecord.present.length / totalStudentsOnDate) * 100) : 0;
+                document.getElementById('todayAttendance').textContent = `${percentage}%`;
+            } else {
+                document.getElementById('todayAttendance').textContent = 'Not taken';
+            }
+            
+            let pendingCount = 0;
+            students.forEach(student => {
+                const studentFees = fees.filter(f => f.studentId === student.id && f.month === currentMonth);
+                const totalPaid = studentFees.reduce((sum, fee) => sum + fee.amount, 0);
+                if (totalPaid < student.fee) {
+                    pendingCount++;
+                }
+            });
+            document.getElementById('pendingFees').textContent = pendingCount;
+        }
+
+        // Calculator functions
+        function appendToCalc(value) {
+            calcExpression += value;
+            document.getElementById('calcDisplay').value = calcExpression;
+        }
+
+        function clearCalc() {
+            calcExpression = '';
+            document.getElementById('calcDisplay').value = '';
+        }
+
+        function deleteLast() {
+            calcExpression = calcExpression.slice(0, -1);
+            document.getElementById('calcDisplay').value = calcExpression;
+        }
+
+        function calculateResult() {
+            try {
+                const result = eval(calcExpression.replace(/×/g, '*'));
+                calcExpression = result.toString();
+                document.getElementById('calcDisplay').value = calcExpression;
+            } catch (error) {
+                alert('Invalid calculation');
+                clearCalc();
+            }
+        }
+
+        // Utility functions
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+    </script>
+</body>
+</html>
