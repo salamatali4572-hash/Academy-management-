@@ -1291,7 +1291,7 @@
                         </div>
                         <div class="form-group">
                             <label>Mark Attendance for Students</label>
-                            <div id="attendanceList" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); padding: 15px; border-radius: 8px; background-color: #2b2b2b;">
+                            <div id="attendanceList" style="max-height: 500px; overflow-y: auto; border: 1px solid var(--border); padding: 15px; border-radius: 8px; background-color: #2b2b2b;">
                                 </div>
                         </div>
                         <button type="submit" class="btn" style="margin-top: 20px;"><i class="fas fa-save"></i> Save Attendance</button>
@@ -1431,6 +1431,11 @@
 
         // Validate current user session
         function validateUserSession() {
+            // NOTE: This check allows the app to load for initial development/testing
+            if (!currentUser && users.length === 0) {
+                 // Allow execution if no user is registered (first run scenario)
+                return true; 
+            }
             if (!currentUser) {
                 console.error("No user session found");
                 handleLogout();
@@ -1636,12 +1641,19 @@
 
         // UI Navigation functions
         function showApp() {
-            if (!validateUserSession()) return;
+            if (!validateUserSession()) {
+                 // If validation fails and it's not the initial setup, prevent showing the app
+                if (currentUser !== null || users.length > 0) return;
+            }
             
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('appSection').style.display = 'block';
-            document.getElementById('loggedInUser').textContent = currentUser.username;
-            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            
+            // Handle display for logged-in vs. non-logged-in (initial load)
+            const userName = currentUser ? currentUser.username : 'Admin';
+            document.getElementById('loggedInUser').textContent = userName;
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+            
             showSection('dashboard');
             
             // Ensure all UI elements are updated with fresh data after login
@@ -1691,11 +1703,11 @@
             const newStudent = {
                 id: generateId(),
                 name,
-                grade,
+                grade: parseInt(grade), // Save grade as a number for sorting
                 phone,
                 fee: parseInt(fee),
                 admissionDate: new Date().toISOString().split('T')[0],
-                createdBy: currentUser.username
+                createdBy: currentUser ? currentUser.username : 'System'
             };
             
             students.push(newStudent);
@@ -1716,8 +1728,10 @@
             
             const tbody = document.querySelector('#studentsTable tbody');
             tbody.innerHTML = '';
+
+            const sortedStudents = [...students].sort((a, b) => a.grade - b.grade || a.name.localeCompare(b.name));
             
-            students.forEach(student => {
+            sortedStudents.forEach(student => {
                 // Calculate fee status for this month
                 const currentMonth = new Date().toISOString().slice(0, 7);
                 const studentFees = fees.filter(f => f.studentId === student.id && f.month === currentMonth);
@@ -1854,7 +1868,7 @@
                 month,
                 amount: amount,
                 datePaid,
-                collectedBy: currentUser.username
+                collectedBy: currentUser ? currentUser.username : 'System'
             };
             
             fees.push(newFee);
@@ -1990,7 +2004,31 @@
             openPinModal();
         }
 
-        // Attendance Management functions
+        // --- NEW/MODIFIED Attendance Management functions ---
+
+        // Function to handle the Present/Absent toggle and instant alert
+        function toggleAttendance(studentId, isChecked) {
+            if (!validateUserSession()) return;
+            
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const date = document.getElementById('attendanceDate').value;
+            const alertDiv = document.getElementById(`alert-status-${studentId}`);
+            
+            // Update the visual status
+            if (isChecked) {
+                alertDiv.innerHTML = '<span class="status-badge status-present">Present</span>';
+            } else {
+                alertDiv.innerHTML = '<span class="status-badge status-absent">Absent</span>';
+                
+                // Immediate WhatsApp Alert for Absent Student
+                const message = `Attendance Alert: ${student.name} was marked absent on ${date}. Please contact the academy for more information. - Created by Ali Muridke (03091539086)`;
+                openWhatsApp(student.phone, message);
+            }
+        }
+
+        // Function to load the attendance form, grouped by grade
         function loadAttendanceForm() {
             if (!validateUserSession()) return;
             
@@ -2005,44 +2043,85 @@
             const date = document.getElementById('attendanceDate').value;
             const existingRecord = attendance.find(a => a.date === date);
 
-            students.forEach(student => {
-                const isPresent = existingRecord ? existingRecord.present.includes(student.id) : true;
+            // Group students by grade
+            const studentsByGrade = students.reduce((acc, student) => {
+                const grade = student.grade;
+                if (!acc[grade]) acc[grade] = [];
+                acc[grade].push(student);
+                return acc;
+            }, {});
+            
+            // Sort grades numerically
+            const sortedGrades = Object.keys(studentsByGrade).sort((a, b) => parseInt(a) - parseInt(b));
+
+            sortedGrades.forEach(grade => {
+                const gradeContainer = document.createElement('div');
+                gradeContainer.style.marginBottom = '20px';
+                gradeContainer.innerHTML = `<h4 style="color: var(--secondary); border-bottom: 1px dashed var(--border); padding-bottom: 5px; margin-bottom: 15px;">Grade ${grade}</h4>`;
                 
-                const div = document.createElement('div');
-                div.style.display = 'flex';
-                div.style.alignItems = 'center';
-                div.style.marginBottom = '10px';
-                div.style.padding = '10px';
-                div.style.border = '1px solid var(--border)';
-                div.style.borderRadius = '6px';
-                div.style.backgroundColor = 'var(--surface)'; 
-                
-                const statusText = isPresent ? 'Present' : 'Absent';
-                const statusClass = isPresent ? 'status-present' : 'status-absent';
-                
-                div.innerHTML = `
-                    <input type="checkbox" id="attendance-${student.id}" ${isPresent ? 'checked' : ''} style="margin-right: 15px; width: 20px; height: 20px; accent-color: var(--primary);">
-                    <label for="attendance-${student.id}" style="margin: 0; flex-grow: 1; color: var(--text-primary);">${student.name} (Grade ${student.grade})</label>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                `;
-                
-                const checkbox = div.querySelector(`#attendance-${student.id}`);
-                const statusSpan = div.querySelector('span');
-                
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        statusSpan.textContent = 'Present';
-                        statusSpan.className = 'status-badge status-present';
-                    } else {
-                        statusSpan.textContent = 'Absent';
-                        statusSpan.className = 'status-badge status-absent';
-                    }
+                // Sort students alphabetically within the grade
+                studentsByGrade[grade].sort((a, b) => a.name.localeCompare(b.name));
+
+                studentsByGrade[grade].forEach(student => {
+                    // Determine initial status: checked if present in existing record, or default to present (true)
+                    const isPresent = existingRecord ? existingRecord.present.includes(student.id) : true;
+                    
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.marginBottom = '10px';
+                    div.style.padding = '10px';
+                    div.style.border = '1px solid var(--border)';
+                    div.style.borderRadius = '6px';
+                    div.style.backgroundColor = 'var(--surface)'; 
+                    div.setAttribute('data-student-id', student.id);
+                    
+                    const statusText = isPresent ? 'Present' : 'Absent';
+                    const statusClass = isPresent ? 'status-present' : 'status-absent';
+
+                    div.innerHTML = `
+                        <input type="checkbox" id="attendance-${student.id}" class="attendance-checkbox" ${isPresent ? 'checked' : ''} style="display: none;">
+                        <label style="margin: 0; flex-grow: 1; color: var(--text-primary); font-weight: 500;">${student.name}</label>
+                        <div id="alert-status-${student.id}" style="margin-right: 15px;">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="action-buttons" style="gap: 5px;">
+                            <button type="button" class="btn btn-sm btn-success attendance-toggle-btn" data-id="${student.id}" data-action="present" title="Mark Present (✅)" style="padding: 8px; width: 35px; height: 35px;"><i class="fas fa-check"></i></button>
+                            <button type="button" class="btn btn-sm btn-danger attendance-toggle-btn" data-id="${student.id}" data-action="absent" title="Mark Absent (❌)" style="padding: 8px; width: 35px; height: 35px;"><i class="fas fa-times"></i></button>
+                        </div>
+                    `;
+                    
+                    gradeContainer.appendChild(div);
                 });
                 
-                container.appendChild(div);
+                container.appendChild(gradeContainer);
+            });
+            
+            // Attach event listeners for the new toggle buttons
+            document.querySelectorAll('.attendance-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const action = this.getAttribute('data-action');
+                    const checkbox = document.getElementById(`attendance-${studentId}`);
+                    
+                    if (action === 'present') {
+                        if (!checkbox.checked) {
+                            checkbox.checked = true;
+                            // Only call toggle if the state changes to present (no alert needed)
+                            toggleAttendance(studentId, true); 
+                        }
+                    } else if (action === 'absent') {
+                        if (checkbox.checked) {
+                            checkbox.checked = false;
+                            // Call toggle for instant alert and visual update
+                            toggleAttendance(studentId, false); 
+                        }
+                    }
+                });
             });
         }
 
+        // Function to save the attendance record
         function handleAttendance(e) {
             e.preventDefault();
             if (!validateUserSession()) return;
@@ -2056,13 +2135,13 @@
             const absentStudents = [];
             
             students.forEach(student => {
+                // Read state from the hidden checkbox
                 const checkbox = document.getElementById(`attendance-${student.id}`);
                 if (checkbox && checkbox.checked) {
                     presentStudents.push(student.id);
                 } else if (checkbox) {
                     absentStudents.push(student.id);
-                    const message = `Attendance Alert: ${student.name} was absent on ${date}. Please contact the academy for more information. - Created by Ali Muridke (03091539086)`;
-                    openWhatsApp(student.phone, message);
+                    // NOTE: WhatsApp alert for absent is handled *instantly* by toggleAttendance()
                 }
             });
             
@@ -2076,22 +2155,50 @@
                 date,
                 present: presentStudents,
                 absent: absentStudents,
-                markedBy: currentUser.username
+                markedBy: currentUser ? currentUser.username : 'System'
             };
             
             attendance.push(newAttendance);
             saveUserData();
             
-            if (absentStudents.length > 0) {
-                alert('Attendance saved successfully! WhatsApp alerts ready to send for absent students.');
-            } else {
-                alert('Attendance saved successfully! All students are present today.');
-            }
+            alert('Attendance saved successfully! Absent student alerts were sent via WhatsApp upon marking.');
             
+            // Reload form to reflect newly saved data/reset the state
+            loadAttendanceForm(); 
             loadAttendanceTable();
             updateDashboard();
         }
 
+
+        function resendAbsentAlerts(attendanceId) {
+            if (!validateUserSession()) return;
+            
+            const record = attendance.find(a => a.id === attendanceId);
+            
+            if (!record) {
+                alert("Attendance record not found.");
+                return;
+            }
+            
+            record.absent.forEach(studentId => {
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    const message = `Attendance Alert: ${student.name} was absent on ${record.date}. Please contact the academy for more info thanks information. - Created by Ali Muridke (03091539086)`;
+                    openWhatsApp(student.phone, message);
+                }
+            });
+            
+            alert('WhatsApp alerts ready to send for absent students!');
+        }
+
+        function deleteAttendance(id) {
+            if (!validateUserSession()) return;
+            
+            currentAction = 'deleteAttendance';
+            currentItemId = id;
+            openPinModal();
+        }
+        
         function loadAttendanceTable() {
             if (!validateUserSession()) return;
             
@@ -2101,7 +2208,8 @@
             const sortedAttendance = [...attendance].sort((a, b) => new Date(b.date) - new Date(a.date));
             
             sortedAttendance.forEach(record => {
-                const totalStudentsOnDate = record.present.length + record.absent.length;
+                // Ensure to check if the student list is populated to avoid errors on initial load
+                const totalStudentsOnDate = students.length > 0 ? students.length : (record.present.length + record.absent.length);
                 const percentage = totalStudentsOnDate > 0 ? Math.round((record.present.length / totalStudentsOnDate) * 100) : 0;
                 
                 const row = document.createElement('tr');
@@ -2134,34 +2242,6 @@
             });
         }
 
-        function resendAbsentAlerts(attendanceId) {
-            if (!validateUserSession()) return;
-            
-            const record = attendance.find(a => a.id === attendanceId);
-            
-            if (!record) {
-                alert("Attendance record not found.");
-                return;
-            }
-            
-            record.absent.forEach(studentId => {
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    const message = `Attendance Alert: ${student.name} was absent on ${record.date}. Please contact the academy for more info thanks information. - Created by Ali Muridke (03091539086)`;
-                    openWhatsApp(student.phone, message);
-                }
-            });
-            
-            alert('WhatsApp alerts ready to send for absent students!');
-        }
-
-        function deleteAttendance(id) {
-            if (!validateUserSession()) return;
-            
-            currentAction = 'deleteAttendance';
-            currentItemId = id;
-            openPinModal();
-        }
 
         // WhatsApp Integration
         function openWhatsApp(phone, message) {
@@ -2265,8 +2345,12 @@
             const todayRecord = attendance.find(a => a.date === today);
             
             if (todayRecord) {
-                const totalStudentsOnDate = todayRecord.present.length + todayRecord.absent.length;
-                const percentage = totalStudentsOnDate > 0 ? Math.round((todayRecord.present.length / totalStudentsOnDate) * 100) : 0;
+                // Use total number of students currently registered for percentage calculation
+                const totalRegisteredStudents = students.length; 
+                let percentage = 0;
+                if (totalRegisteredStudents > 0) {
+                     percentage = Math.round((todayRecord.present.length / totalRegisteredStudents) * 100);
+                }
                 document.getElementById('todayAttendance').textContent = `${percentage}%`;
             } else {
                 document.getElementById('todayAttendance').textContent = 'Not taken';
@@ -2301,7 +2385,15 @@
 
         function calculateResult() {
             try {
-                const result = eval(calcExpression.replace(/×/g, '*'));
+                // Sanitize input to only allow numbers and allowed operators
+                const safeExpression = calcExpression.replace(/[^-()\d/*+.×]/g, ''); 
+                
+                // Replace the visual '×' with the mathematical '*'
+                const expressionToEval = safeExpression.replace(/×/g, '*'); 
+
+                // Use a safe calculation method if possible, but for simplicity in this file:
+                const result = eval(expressionToEval); 
+                
                 calcExpression = result.toString();
                 document.getElementById('calcDisplay').value = calcExpression;
             } catch (error) {
@@ -2315,5 +2407,5 @@
             return Math.random().toString(36).substr(2, 9).toUpperCase();
         }
     </script>
-</body>
+</body>https://salamatali4572-hash.github.io/Academy-management-/
 </html>
